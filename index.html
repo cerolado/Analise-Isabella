@@ -1,403 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard de Retenção · Queima Diária</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard Executivo · Isabella do Carmo · 72 Conversas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #F5F2ED;
-    --surface: #FFFFFF;
-    --surface2: #EDEAE4;
-    --text: #1A1714;
-    --text-muted: #6B6460;
-    --text-hint: #9C9490;
-    --accent: #C84B2F;
-    --accent-light: #FAE8E3;
-    --green: #2D6A4F;
-    --green-light: #D8F3DC;
-    --amber: #885E00;
-    --amber-light: #FFF3CD;
-    --blue: #1A4E8C;
-    --blue-light: #DBE9FA;
-    --border: rgba(26,23,20,0.1);
-    --radius: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.05);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  header {
-    background: var(--text); color: #F5F2ED;
-    padding: 28px 48px 24px;
-    display: flex; align-items: flex-end; justify-content: space-between;
-  }
-  .header-left h1 { font-family: 'DM Serif Display', serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; line-height: 1; }
-  .header-left .subtitle { font-size: 13px; color: rgba(245,242,237,0.5); margin-top: 6px; font-weight: 300; letter-spacing: 0.04em; }
-  .header-right { text-align: right; }
-  .header-right .atendente { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 18px; color: rgba(245,242,237,0.7); }
-  .header-right .periodo { font-size: 12px; color: rgba(245,242,237,0.4); margin-top: 3px; font-weight: 300; }
-
-  main { max-width: 1100px; margin: 0 auto; padding: 36px 32px 60px; }
-
-  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 14px; }
-
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
-  .kpi-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 20px 22px 18px; box-shadow: var(--shadow);
-    position: relative; overflow: hidden; animation: fadeUp 0.5s ease both;
-  }
-  .kpi-card:nth-child(1){animation-delay:.05s} .kpi-card:nth-child(2){animation-delay:.12s}
-  .kpi-card:nth-child(3){animation-delay:.19s} .kpi-card:nth-child(4){animation-delay:.26s}
-  .kpi-card::before { content:''; position:absolute; top:0;left:0;right:0; height:3px; border-radius:var(--radius) var(--radius) 0 0; background:var(--border); }
-  .kpi-card.accent::before{background:var(--accent)} .kpi-card.green::before{background:var(--green)}
-  .kpi-card.amber::before{background:var(--amber)} .kpi-card.blue::before{background:var(--blue)}
-  .kpi-label { font-size: 11px; color: var(--text-hint); font-weight: 500; letter-spacing: 0.02em; margin-bottom: 8px; }
-  .kpi-value { font-family: 'DM Serif Display', serif; font-size: 42px; line-height: 1; color: var(--text); }
-  .kpi-card.accent .kpi-value{color:var(--accent)} .kpi-card.green .kpi-value{color:var(--green)}
-  .kpi-card.amber .kpi-value{color:var(--amber)} .kpi-card.blue .kpi-value{color:var(--blue)}
-  .kpi-sub { font-size: 11px; color: var(--text-hint); margin-top: 5px; font-weight: 300; }
-
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 36px; }
-  .card { background: var(--surface); border-radius: var(--radius); padding: 22px 24px; box-shadow: var(--shadow); animation: fadeUp 0.5s ease both; }
-  .card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-  .card-title::after { content:''; flex:1; height:1px; background:var(--border); }
-
-  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .bar-row:last-child { margin-bottom: 0; }
-  .bar-label { font-size: 12px; color: var(--text-muted); width: 200px; flex-shrink: 0; line-height: 1.35; }
-  .bar-track { flex: 1; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
-  .bar-count { font-size: 12px; font-weight: 600; color: var(--text-muted); width: 24px; text-align: right; }
-
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 36px; }
-  .chart-wrap { position: relative; height: 220px; }
-
-  .table-card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 36px; overflow: hidden; animation: fadeUp 0.5s ease 0.3s both; }
-  .table-header { padding: 18px 24px 14px; border-bottom: 1px solid var(--border); }
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { text-align: left; padding: 10px 16px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); background: var(--bg); border-bottom: 1px solid var(--border); }
-  td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(245,242,237,0.6); }
-  .badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-  .badge-green{background:var(--green-light);color:var(--green)}
-  .badge-red{background:var(--accent-light);color:var(--accent)}
-  .badge-amber{background:var(--amber-light);color:var(--amber)}
-  .badge-blue{background:var(--blue-light);color:var(--blue)}
-  .motivo-text { color: var(--text-muted); font-size: 12px; }
-
-  .scripts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 36px; }
-  .script-card { background: var(--surface); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); border-left: 3px solid var(--text); animation: fadeUp 0.5s ease both; }
-  .script-card:nth-child(1){border-color:var(--green);animation-delay:.1s}
-  .script-card:nth-child(2){border-color:var(--blue);animation-delay:.18s}
-  .script-card:nth-child(3){border-color:var(--amber);animation-delay:.26s}
-  .script-card:nth-child(4){border-color:#9B59B6;animation-delay:.34s}
-  .script-card:nth-child(5){border-color:var(--accent);animation-delay:.42s;grid-column:1/-1}
-  .script-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-hint); margin-bottom: 10px; }
-  .script-text { font-size: 13px; color: var(--text-muted); line-height: 1.65; font-style: italic; font-family: 'DM Serif Display', serif; }
-  .script-rate { margin-top: 12px; font-size: 11px; font-weight: 600; }
-
-  footer { background: var(--text); color: rgba(245,242,237,0.4); text-align: center; padding: 18px; font-size: 11px; font-weight: 300; letter-spacing: 0.04em; }
-
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-
-  @media(max-width:768px){
-    header{padding:20px 20px 18px;flex-direction:column;align-items:flex-start;gap:12px}
-    main{padding:24px 16px 40px}
-    .kpi-row{grid-template-columns:1fr 1fr}
-    .two-col,.charts-row,.scripts-grid{grid-template-columns:1fr}
-    .script-card:nth-child(5){grid-column:auto}
-    .bar-label{width:140px}
-  }
+:root{--bg:#f5f1ea;--ink:#171310;--muted:#756b63;--soft:#a79d94;--card:#fffdf9;--line:rgba(23,19,16,.1);--shadow:0 18px 48px rgba(45,32,24,.08),0 2px 8px rgba(45,32,24,.05);--red:#c84b2f;--red2:#fae7e1;--green:#2d6a4f;--green2:#def1e6;--amber:#9a6715;--amber2:#fff1d3;--blue:#1f5b8f;--blue2:#dfeefa;--purple:#7656a6;--purple2:#ece5f6;--slate:#5f6570;--slate2:#eceff2;--radius:22px}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'DM Sans',sans-serif;background:radial-gradient(circle at top left,#fff9f0,#f5f1ea 42%,#eee7dd);color:var(--ink)}header{background:#171310;color:#f7f0e6;padding:42px 54px 36px;position:relative;overflow:hidden}header:after{content:'';position:absolute;width:460px;height:460px;right:-160px;top:-170px;border-radius:999px;background:radial-gradient(circle,rgba(45,106,79,.38),rgba(45,106,79,0) 68%)}.head{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;gap:30px;align-items:flex-end;position:relative;z-index:1}h1{font-family:'DM Serif Display',serif;font-size:46px;font-weight:400;letter-spacing:-.035em;line-height:.96}.sub{margin-top:11px;color:rgba(247,240,230,.56);font-size:12px;letter-spacing:.11em;text-transform:uppercase}.who{text-align:right}.who strong{font-family:'DM Serif Display',serif;font-style:italic;font-size:25px;font-weight:400;color:rgba(247,240,230,.9);display:block}.who span{font-size:12px;color:rgba(247,240,230,.48);display:block;margin-top:7px}main{max-width:1280px;margin:0 auto;padding:34px 28px 68px}.kicker{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin:30px 0 14px}.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:19px 18px;box-shadow:var(--shadow);min-height:132px;position:relative;overflow:hidden}.kpi:before{content:'';position:absolute;left:0;right:0;top:0;height:4px;background:var(--line)}.kpi.green:before{background:var(--green)}.kpi.red:before{background:var(--red)}.kpi.amber:before{background:var(--amber)}.kpi.blue:before{background:var(--blue)}.kpi.purple:before{background:var(--purple)}.label{font-size:10px;color:var(--soft);font-weight:800;letter-spacing:.08em;text-transform:uppercase}.value{font-family:'DM Serif Display',serif;font-size:42px;line-height:1;margin-top:12px}.hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:7px}.green .value{color:var(--green)}.red .value{color:var(--red)}.amber .value{color:var(--amber)}.blue .value{color:var(--blue)}.purple .value{color:var(--purple)}.grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}.title{font-size:14px;font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:18px}.title:after{content:'';height:1px;background:var(--line);flex:1}.chart{height:272px;position:relative}.legend{display:flex;flex-wrap:wrap;gap:9px 14px;justify-content:center;margin-top:12px}.legend span{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}.dot{width:9px;height:9px;border-radius:3px}.story{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.insight{padding:24px;border-radius:22px;background:linear-gradient(135deg,#171310,#26362c);color:#f7f0e6;box-shadow:var(--shadow)}.insight h2{font-family:'DM Serif Display',serif;font-size:29px;font-weight:400;line-height:1.05}.insight p{margin-top:14px;font-size:13px;line-height:1.65;color:rgba(247,240,230,.72)}.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(247,240,230,.82)}.bar-row{display:grid;grid-template-columns:180px 1fr 36px;gap:10px;align-items:center;margin:11px 0}.bar-label{font-size:12px;color:var(--muted);line-height:1.3}.bar-track{height:8px;border-radius:999px;background:#ebe5dc;overflow:hidden}.bar-fill{height:100%;border-radius:999px}.bar-count{font-size:12px;font-weight:800;text-align:right}.matrix{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.m{border-radius:18px;padding:16px;border:1px solid var(--line);background:#fffaf3}.m b{font-family:'DM Serif Display',serif;font-size:31px;font-weight:400;display:block}.m span{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:block;margin-top:4px}.m p{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}.ok{background:var(--green2)}.bad{background:var(--red2)}.ext{background:var(--blue2)}.pend{background:var(--slate2)}table{width:100%;border-collapse:collapse;font-size:12.2px}th{text-align:left;padding:12px 14px;background:#f2ece3;border-bottom:1px solid var(--line);font-size:10px;color:var(--soft);letter-spacing:.12em;text-transform:uppercase;position:sticky;top:0;z-index:2}td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}tr:hover td{background:rgba(245,241,234,.7)}.muted{color:var(--muted)}.tag{display:inline-flex;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:800;white-space:nowrap}.tg{background:var(--green2);color:var(--green)}.tr{background:var(--red2);color:var(--red)}.ta{background:var(--amber2);color:var(--amber)}.tb{background:var(--blue2);color:var(--blue)}.tp{background:var(--purple2);color:var(--purple)}.ts{background:var(--slate2);color:var(--slate)}.table-card{padding:0;overflow:hidden}.table-head{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px}.table-head .title{margin:0}.search{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-size:12px;min-width:280px;outline:none}.table-wrap{max-height:720px;overflow:auto}.script{border-radius:20px;padding:20px;background:var(--card);box-shadow:var(--shadow);border:1px solid var(--line);border-left:4px solid var(--green)}.script.red{border-left-color:var(--red)}.script.amber{border-left-color:var(--amber)}.script.purple{border-left-color:var(--purple)}.script .st{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:11px}.script .txt{font-family:'DM Serif Display',serif;font-style:italic;font-size:15px;line-height:1.55;color:var(--muted)}.script .rate{font-size:12px;font-weight:800;margin-top:13px}footer{background:#171310;color:rgba(247,240,230,.48);text-align:center;padding:18px;font-size:11px;letter-spacing:.06em}@media(max-width:1050px){.kpis{grid-template-columns:repeat(3,1fr)}.grid2,.story{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.matrix{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){header{padding:28px 22px}.head{display:block}.who{text-align:left;margin-top:20px}h1{font-size:34px}main{padding:24px 14px 48px}.kpis{grid-template-columns:1fr 1fr}.matrix{grid-template-columns:1fr}.bar-row{grid-template-columns:126px 1fr 28px}.table-head{display:block}.search{margin-top:12px;min-width:100%;width:100%}}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="header-left">
-    <h1>Dashboard de Retenção</h1>
-    <div class="subtitle">Queima Diária · Análise de conversas de cancelamento</div>
-  </div>
-  <div class="header-right">
-    <div class="atendente">Isabella do Carmo</div>
-    <div class="periodo">04 a 08 de maio de 2026 · 76 conversas</div>
-  </div>
-</header>
-
+<header><div class="head"><div><h1>Dashboard de Retenção</h1><div class="sub">Isabella do Carmo · 72 conversas auditadas · 04 a 08 de maio de 2026</div></div><div class="who"><strong>Isabella do Carmo</strong><span id="headCount">Validação: 72 recebidas · 72 no dashboard</span></div></div></header>
 <main>
+<div class="kicker">Validação da base</div>
+<section class="kpis">
+  <div class="kpi"><div class="label">Conversas no painel</div><div class="value" id="kTotal">72</div><div class="hint">controle calculado pelo array</div></div>
+  <div class="kpi green"><div class="label">Retidas / mantidas</div><div class="value" id="kRetida">0</div><div class="hint">plano principal preservado ou suporte resolvido</div></div>
+  <div class="kpi red"><div class="label">Canceladas</div><div class="value" id="kCancelada">0</div><div class="hint">cancelamento total efetivado</div></div>
+  <div class="kpi amber"><div class="label">Adicional resolvido</div><div class="value" id="kAdicional">0</div><div class="hint">Jejum / Transformação / extras removidos</div></div>
+  <div class="kpi purple"><div class="label">Ticket / e-mail</div><div class="value" id="kTicket">0</div><div class="hint">fora da resolução direta</div></div>
+  <div class="kpi blue"><div class="label">Canal externo</div><div class="value" id="kExterno">0</div><div class="hint">Apple, Google, banco ou outro time</div></div>
+</section>
 
-  <!-- KPIs -->
-  <div class="section-label">Visão geral · 04–08 mai 2026</div>
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div class="kpi-label">Total de conversas</div>
-      <div class="kpi-value">76</div>
-      <div class="kpi-sub">5 dias analisados</div>
-    </div>
-    <div class="kpi-card accent">
-      <div class="kpi-label">Cancelamentos efetivados</div>
-      <div class="kpi-value">27</div>
-      <div class="kpi-sub">36% das conversas</div>
-    </div>
-    <div class="kpi-card green">
-      <div class="kpi-label">Retidos / convertidos</div>
-      <div class="kpi-value">11</div>
-      <div class="kpi-sub">14% de retenção ativa</div>
-    </div>
-    <div class="kpi-card amber">
-      <div class="kpi-label">Encaminhados / outros</div>
-      <div class="kpi-value">38</div>
-      <div class="kpi-sub">50% encaminhados</div>
-    </div>
-  </div>
+<div class="kicker">Leitura executiva</div>
+<section class="story">
+  <div class="insight"><h2>O padrão da Isabella é correção operacional rápida: remover adicionais, corrigir cobrança e salvar o plano principal quando possível.</h2><p>A maior parte do atrito vem de adicionais comprados sem clareza, cobrança integral percebida como mensal, compra por Apple/Google e pedidos que precisam sair para e-mail, ticket ou outro time. A separação abaixo mostra o que é retenção real, cancelamento definitivo e encaminhamento operacional.</p><div class="pills"><span class="pill">72 conversas</span><span class="pill">Adicional não intencional</span><span class="pill">Reembolso</span><span class="pill">Ticket 48h úteis</span><span class="pill">Apple / Google</span><span class="pill">Suporte de acesso</span></div></div>
+  <div class="card"><div class="title">Qualidade dos desfechos</div><div class="matrix"><div class="m ok"><b id="mKeep">0</b><span>Salvas / resolvidas</span><p>Plano principal mantido, adicional removido ou problema de acesso resolvido.</p></div><div class="m bad"><b id="mLost">0</b><span>Canceladas</span><p>Cliente recusou proposta ou pediu cancelamento total.</p></div><div class="m"><b id="mAdd">0</b><span>Adicionais</span><p>Casos com Jejum, Transformação ou pacote extra comprado sem intenção.</p></div><div class="m ext"><b id="mEsc">0</b><span>Escaladas</span><p>Ticket, e-mail, Apple/Google, outro time, pendente ou validação.</p></div></div></div>
+</section>
 
-  <!-- CHARTS -->
-  <div class="section-label">Distribuição</div>
-  <div class="charts-row">
-    <div class="card" style="animation-delay:0.1s">
-      <div class="card-title">Resultado das conversas</div>
-      <div class="chart-wrap">
-        <canvas id="chartOutcome"></canvas>
-      </div>
-    </div>
-    <div class="card" style="animation-delay:0.18s">
-      <div class="card-title">Conversas por dia</div>
-      <div class="chart-wrap">
-        <canvas id="chartDays"></canvas>
-      </div>
-    </div>
-  </div>
+<div class="kicker">Distribuição</div>
+<section class="grid2"><div class="card"><div class="title">Resultado final das 72 conversas</div><div class="chart"><canvas id="chartOutcome"></canvas></div><div class="legend" id="legendOutcome"></div></div><div class="card"><div class="title">Conversas por dia</div><div class="chart"><canvas id="chartDays"></canvas></div><div class="legend" id="legendDays"></div></div></section>
 
-  <!-- BAR CHARTS -->
-  <div class="two-col">
-    <div class="card" style="animation-delay:0.22s">
-      <div class="card-title">Motivos de cancelamento</div>
-      <div class="bar-row">
-        <div class="bar-label">Programa adicional não intencional (Jejum/Transf.)</div>
-        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#C84B2F;"></div></div>
-        <div class="bar-count">10</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Não se adaptou / não gostou</div>
-        <div class="bar-track"><div class="bar-fill" style="width:80%;background:#885E00;"></div></div>
-        <div class="bar-count">8</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Cobrança à vista (esperava parcelado/recorrente)</div>
-        <div class="bar-track"><div class="bar-fill" style="width:60%;background:#885E00;"></div></div>
-        <div class="bar-count">6</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Renovação automática indesejada</div>
-        <div class="bar-track"><div class="bar-fill" style="width:40%;background:#1A4E8C;"></div></div>
-        <div class="bar-count">4</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Falta de tempo / rotina</div>
-        <div class="bar-track"><div class="bar-fill" style="width:30%;background:#9B59B6;"></div></div>
-        <div class="bar-count">3</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Compra por impulso / arrependimento</div>
-        <div class="bar-track"><div class="bar-fill" style="width:20%;background:#6C757D;"></div></div>
-        <div class="bar-count">2</div>
-      </div>
-    </div>
-    <div class="card" style="animation-delay:0.3s">
-      <div class="card-title">Táticas de retenção usadas</div>
-      <div class="bar-row">
-        <div class="bar-label">Cancelar adicional + manter plano principal</div>
-        <div class="bar-track"><div class="bar-fill" style="width:100%;background:#2D6A4F;"></div></div>
-        <div class="bar-count">10</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Cancelar + link parcelado/recorrente</div>
-        <div class="bar-track"><div class="bar-fill" style="width:60%;background:#1A4E8C;"></div></div>
-        <div class="bar-count">6</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Desc. 10–20% + Nutri / cronograma</div>
-        <div class="bar-track"><div class="bar-fill" style="width:50%;background:#885E00;"></div></div>
-        <div class="bar-count">5</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Cronograma personalizado (sem desconto)</div>
-        <div class="bar-track"><div class="bar-fill" style="width:30%;background:#9B59B6;"></div></div>
-        <div class="bar-count">3</div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">Encaminhar p/ ticket sem tentativa de retenção</div>
-        <div class="bar-track"><div class="bar-fill" style="width:80%;background:#C84B2F;"></div></div>
-        <div class="bar-count">~22</div>
-      </div>
-    </div>
-  </div>
+<div class="kicker">Motivos e rotas operacionais</div>
+<section class="grid2"><div class="card"><div class="title">Principais motivos</div><div id="motivos"></div></div><div class="card"><div class="title">Encaminhamento separado corretamente</div><div id="rotas"></div><p class="hint">“Encaminhado” foi aberto em: outro time, ticket/e-mail, Apple/Google/banco, suporte e sem retorno.</p></div></section>
 
-  <!-- TABLE -->
-  <div class="section-label">Histórico de conversas</div>
-  <div class="table-card">
-    <div class="table-header">
-      <div class="card-title" style="margin-bottom:0">Todas as conversas analisadas</div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Data</th>
-          <th>Motivo</th>
-          <th>Tática usada</th>
-          <th>Resultado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- 04/05 -->
-        <tr><td>Fernanda Mendes</td><td>04/05</td><td class="motivo-text">Programas adicionais não intencionais</td><td class="motivo-text">Cancelou adicionais + liberou DUO grátis</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Lívia Isoldi</td><td>04/05</td><td class="motivo-text">Jejum Diário não intencional</td><td class="motivo-text">Cancelou adicional + manteve plano principal</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Hélen Cássia</td><td>04/05</td><td class="motivo-text">Jejum Diário não intencional</td><td class="motivo-text">Cancelou e estornou adicional</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Confeitaria da Fran (Naty Fiais)</td><td>04/05</td><td class="motivo-text">Adicional consumiu limite (remédio filha)</td><td class="motivo-text">Cancelou adicional R$298 + manteve R$39,90</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Gabriela</td><td>04/05</td><td class="motivo-text">Cobrança à vista (esperava mensal)</td><td class="motivo-text">Cancelou + link parcelado 10% desconto</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Samantha</td><td>07/05</td><td class="motivo-text">Cobrança à vista (esperava testar 30 dias)</td><td class="motivo-text">Explicou garantia 30d + desconto mensal</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Renata Aguiar</td><td>07/05</td><td class="motivo-text">Falta de tempo / lipedema</td><td class="motivo-text">Cronograma personalizado lipedema</td><td><span class="badge badge-green">Retida (pendente)</span></td></tr>
-        <tr><td>Leticia Lima</td><td>07/05</td><td class="motivo-text">Acompanhamento vago</td><td class="motivo-text">Grupo WhatsApp + Desafio Maio + cronograma</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Rosilene Antunes</td><td>07/05</td><td class="motivo-text">Jejum + Mentalidade não intencionais</td><td class="motivo-text">Cancelou Jejum + manteve plano principal</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>Ana Maria Teixeira (Ana Caroline)</td><td>05/05</td><td class="motivo-text">Jejum Diário não intencional</td><td class="motivo-text">Cancelou adicional + manteve plano</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <tr><td>. (Ederlandia)</td><td>05/05</td><td class="motivo-text">Adicional não intencional + sem acesso</td><td class="motivo-text">Cancelou adicional + onboarding completo</td><td><span class="badge badge-green">Retida</span></td></tr>
-        <!-- Cancelados -->
-        <tr><td>Karen</td><td>04/05</td><td class="motivo-text">Cancelamento pendente há meses</td><td class="motivo-text">Cancelou após histórico de e-mails</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Lana Karla</td><td>04/05</td><td class="motivo-text">Não superou expectativas</td><td class="motivo-text">Reembolso R$34 + Nutri (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Anna Clara</td><td>04/05</td><td class="motivo-text">Falta de tempo</td><td class="motivo-text">10% desc. + cronograma (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Ane Monteiro</td><td>04/05</td><td class="motivo-text">Não quis continuar</td><td class="motivo-text">Cancelou adicional + desc. R$96 (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Raiane Costa</td><td>04/05</td><td class="motivo-text">Não satisfeita</td><td class="motivo-text">Nutri + pergunta objetivo (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Laysla Mesquita</td><td>04/05</td><td class="motivo-text">Vai dividir plano DUO com amiga</td><td class="motivo-text">Promocional maio + DUO grátis (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Marina</td><td>05/05</td><td class="motivo-text">Nutricionista indicou academia</td><td class="motivo-text">Programas academia 90d grátis (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Valeska</td><td>05/05</td><td class="motivo-text">Não era o que esperava</td><td class="motivo-text">Cronograma guiado (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Bárbara</td><td>05/05</td><td class="motivo-text">Cobrança à vista (queria mensal)</td><td class="motivo-text">Link parcelado (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Maria (Cris)</td><td>05/05</td><td class="motivo-text">Sem interesse</td><td class="motivo-text">Reembolso R$43 + Nutri (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Abssany</td><td>06/05</td><td class="motivo-text">Cansaço / falta de ar nos treinos</td><td class="motivo-text">Treinos leves + caminhada (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Yeda</td><td>06/05</td><td class="motivo-text">Arrependimento da compra</td><td class="motivo-text">Perguntou o que sentiu falta (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Giseli</td><td>06/05</td><td class="motivo-text">Renovação automática (não usou o ano passado)</td><td class="motivo-text">20% desc. + Nutri (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Mari</td><td>06/05</td><td class="motivo-text">Confusão "30 dias grátis"</td><td class="motivo-text">Cancelou adicional + tentou manter principal (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Fabi</td><td>06/05</td><td class="motivo-text">Não usa mais (cliente irritada)</td><td class="motivo-text">20% desc. (recusou com ameaça de processo)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Lidi Oliveira</td><td>06/05</td><td class="motivo-text">Falta de tempo</td><td class="motivo-text">Cronograma curto (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Kelly</td><td>07/05</td><td class="motivo-text">Não se adaptou à metodologia</td><td class="motivo-text">20% desc. (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Jessica</td><td>07/05</td><td class="motivo-text">Insatisfeita / não consegue fazer</td><td class="motivo-text">Treinos curtos (recusou)</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <tr><td>Leticia Lima</td><td>08/05</td><td class="motivo-text">App muito confuso</td><td class="motivo-text">—</td><td><span class="badge badge-red">Cancelado</span></td></tr>
-        <!-- Encaminhados -->
-        <tr><td>Xiiiia Créditos</td><td>04/05</td><td class="motivo-text">Cobrado após cancelamento</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Simone</td><td>04/05</td><td class="motivo-text">Cancelamento</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>mirrasaoluisma</td><td>04/05</td><td class="motivo-text">Cancelamento urgente</td><td class="motivo-text">Informou que só atende dúvidas</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>mooniquevieira</td><td>04/05</td><td class="motivo-text">Cancelou ano passado, cobrado de novo</td><td class="motivo-text">Redirecionado p/ e-mail</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Monique (06/05)</td><td>06/05</td><td class="motivo-text">Adicional cobrado indesejado</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Priscilla Rabelo</td><td>06/05</td><td class="motivo-text">Cancelamento</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Lais Sismoto</td><td>06/05</td><td class="motivo-text">Cancelamento (3 dias de uso)</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Fernanda (06/05)</td><td>06/05</td><td class="motivo-text">Pagando sem usar</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Juliana Alves</td><td>06/05</td><td class="motivo-text">E-mail aberto</td><td class="motivo-text">Aguardar retorno e-mail</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Jo</td><td>07/05</td><td class="motivo-text">Cancelamento</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Rosario</td><td>05/05</td><td class="motivo-text">Mais de 1 ano tentando cancelar</td><td class="motivo-text">Redirecionado p/ ticket (nova solicitação)</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Sophia (Apple)</td><td>05/05</td><td class="motivo-text">Cobrado após cancelar na Apple</td><td class="motivo-text">Enviou Termos de Uso; encaminhou Apple</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Doce Encanto (Apple)</td><td>05/05</td><td class="motivo-text">Renovação após cancelamento Apple</td><td class="motivo-text">Enviou Termos de Uso; encaminhou Apple</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Tatiane (Apple)</td><td>05/05</td><td class="motivo-text">Cancelou Apple, sem estorno</td><td class="motivo-text">Encaminhou suporte Apple</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Brenda Silveira</td><td>05/05</td><td class="motivo-text">—</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Thifany Oliveira</td><td>07/05</td><td class="motivo-text">Cancelamento parcial pendente</td><td class="motivo-text">Redirecionado p/ Jéssica (e-mail)</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Joyce Fortunato</td><td>08/05</td><td class="motivo-text">Renovação automática s/ retorno</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Vanessa Santana</td><td>08/05</td><td class="motivo-text">—</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Ana Claudia</td><td>08/05</td><td class="motivo-text">Duas cobranças não reconhecidas</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Nicolas</td><td>08/05</td><td class="motivo-text">Renovação automática</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Carolina Spier</td><td>08/05</td><td class="motivo-text">Renovação automática</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Gi</td><td>08/05</td><td class="motivo-text">Renovação não autorizada</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Pri</td><td>08/05</td><td class="motivo-text">Cancelamento</td><td class="motivo-text">Aguardar e-mail</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Michelle</td><td>08/05</td><td class="motivo-text">Cancelamento</td><td class="motivo-text">Redirecionado p/ ticket</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-        <tr><td>Ana Rodrigues</td><td>08/05</td><td class="motivo-text">Cobrado sem acesso</td><td class="motivo-text">Redirecionado p/ outro time</td><td><span class="badge badge-amber">Encaminhado</span></td></tr>
-      </tbody>
-    </table>
-  </div>
+<div class="kicker">Base completa · 72 conversas</div>
+<section class="card table-card"><div class="table-head"><div class="title">Histórico classificado · Isabella</div><input class="search" id="search" placeholder="Filtrar cliente, motivo, ação ou resultado..."></div><div class="table-wrap"><table id="table"><thead><tr><th>#</th><th>Cliente</th><th>Data</th><th>Motivo</th><th>Ação</th><th>Resultado</th><th>Tipo operacional</th></tr></thead><tbody></tbody></table></div></section>
 
-  <!-- SCRIPTS -->
-  <div class="section-label">Scripts de retenção</div>
-  <div class="scripts-grid">
-    <div class="script-card">
-      <div class="script-tag">Cancelar adicional + manter plano · Taxa ~90%</div>
-      <div class="script-text">"Você adquiriu um programa adicional ao clicar em 'quero testar'. Fiz o cancelamento e estorno para você — agora permanece somente o plano principal ativo."</div>
-      <div class="script-rate" style="color:var(--green)">✓ 10 usos · ~9 retidos — melhor tática do período</div>
-    </div>
-    <div class="script-card">
-      <div class="script-tag">Cronograma personalizado · Taxa ~50%</div>
-      <div class="script-text">"Me conta seu objetivo e rotina (se tem filhos, restrições...) que monto um cronograma perfeito pra você começar — pode ser com treinos de 15min por dia."</div>
-      <div class="script-rate" style="color:var(--amber)">→ 4 usos · 2 retidos · Alta quando há engajamento real</div>
-    </div>
-    <div class="script-card">
-      <div class="script-tag">Cancelar + link parcelado · Taxa ~67%</div>
-      <div class="script-text">"Vou te enviar um link para comprar parcelado em 12x com 10% de desconto. Assim que concluir me avisa que cancelo e estorno o plano atual."</div>
-      <div class="script-rate" style="color:var(--amber)">→ 3 usos · 2 retidos</div>
-    </div>
-    <div class="script-card">
-      <div class="script-tag">Desconto 10–20% + Nutri grátis · Taxa ~10%</div>
-      <div class="script-text">"Consegui uma condição especial: 20% de desconto para manter sua assinatura ativa + 30 dias gratuitos no programa +Q Nutri, com vídeos, receitas e planos alimentares."</div>
-      <div class="script-rate" style="color:var(--accent)">✗ ~10 usos · ~1 retido · Baixa personalização = baixa conversão</div>
-    </div>
-    <div class="script-card">
-      <div class="script-tag">Destaque do período · Atendimento de onboarding · Taxa 100%</div>
-      <div class="script-text">A conversa com Ederlandia (.) e com Renata Aguiar mostram o melhor da Isabella nesse período: quando ela entende a necessidade real da cliente, personaliza o cronograma com contexto (lipedema, mãe de dois filhos, metabolismo, treino na TV) e guia o acesso passo a passo, a retenção é total. Esse modelo deveria ser replicado em mais conversas de cancelamento por "não se adaptar".</div>
-      <div class="script-rate" style="color:var(--green)">✓ 2 usos · 2 retidos · Modelo a expandir</div>
-    </div>
-  </div>
-
-</main>
-
-<footer>
-  Queima Diária · Dashboard de Retenção · Gerado em maio de 2026 · 76 conversas analisadas · Isabella do Carmo · 04–08/mai/2026
-</footer>
-
+<div class="kicker">Scripts e riscos</div>
+<section class="grid3"><div class="script"><div class="st">Script vencedor · adicional</div><div class="txt">“Fiz o cancelamento e estorno do adicional. Ficou ativo somente o plano principal.”</div><div class="rate" style="color:var(--green)">Forte para retenção parcial.</div></div><div class="script"><div class="st">Script vencedor · parcelamento</div><div class="txt">“Te envio o link parcelado; quando concluir, cancelo e estorno o plano atual.”</div><div class="rate" style="color:var(--green)">Resolve dor de limite/cartão.</div></div><div class="script amber"><div class="st">Média eficiência · desconto</div><div class="txt">“Consigo liberar desconto e cronograma para você testar melhor.”</div><div class="rate" style="color:var(--amber)">Ajuda quando a cliente ainda está aberta.</div></div><div class="script red"><div class="st">Baixa eficiência · cancelamento decidido</div><div class="txt">“Qual o motivo? Posso te oferecer +Q Nutri.”</div><div class="rate" style="color:var(--red)">Pouca força quando a decisão já está tomada.</div></div><div class="script purple"><div class="st">Risco · ticket/e-mail</div><div class="txt">“Será necessário abrir ticket. O retorno chegará por e-mail em até 48h úteis.”</div><div class="rate" style="color:var(--purple)">Precisa acompanhamento de SLA.</div></div><div class="script red"><div class="st">Risco · Apple/Google</div><div class="txt">“O cancelamento e reembolso devem ser tratados diretamente pela loja.”</div><div class="rate" style="color:var(--blue)">Alta frustração por baixa governabilidade.</div></div></section>
+</main><footer>Queima Diária · Dashboard executivo de retenção · Isabella do Carmo · 72 conversas</footer>
 <script>
-  const accent='#C84B2F', green='#2D6A4F', amber='#885E00', blue='#1A4E8C', muted='#9C9490';
-
-  new Chart(document.getElementById('chartOutcome'),{
-    type:'doughnut',
-    data:{
-      labels:['Cancelados','Retidos','Encaminhados'],
-      datasets:[{data:[27,11,38],backgroundColor:[accent,green,amber],borderWidth:3,borderColor:'#fff',hoverOffset:6}]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/76*100)}%)`}}}
-    }
-  });
-  const leg1=[{label:'Cancelados 27',color:accent},{label:'Retidos 11',color:green},{label:'Encaminhados 38',color:amber}]
-    .map(i=>`<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6B6460"><span style="width:9px;height:9px;border-radius:2px;background:${i.color};flex-shrink:0"></span>${i.label}</span>`).join('');
-  const d1=document.createElement('div');
-  d1.style='display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;justify-content:center';
-  d1.innerHTML=leg1;
-  document.getElementById('chartOutcome').closest('.card').appendChild(d1);
-
-  new Chart(document.getElementById('chartDays'),{
-    type:'bar',
-    data:{
-      labels:['04/mai','05/mai','06/mai','07/mai','08/mai'],
-      datasets:[
-        {label:'Cancelados',data:[8,8,7,3,1],backgroundColor:accent},
-        {label:'Retidos',   data:[4,3,0,4,0],backgroundColor:green},
-        {label:'Encaminhados',data:[9,8,11,3,7],backgroundColor:amber}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      scales:{
-        x:{stacked:true,grid:{display:false},ticks:{font:{size:11},color:muted}},
-        y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:11},color:muted,stepSize:3}}
-      },
-      plugins:{legend:{display:false}}
-    }
-  });
-  const leg2=[{label:'Cancelados',color:accent},{label:'Retidos',color:green},{label:'Encaminhados',color:amber}]
-    .map(i=>`<span style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6B6460"><span style="width:9px;height:9px;border-radius:2px;background:${i.color};flex-shrink:0"></span>${i.label}</span>`).join('');
-  const d2=document.createElement('div');
-  d2.style='display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;justify-content:center';
-  d2.innerHTML=leg2;
-  document.getElementById('chartDays').closest('.card').appendChild(d2);
+const C={red:'#c84b2f',green:'#2d6a4f',amber:'#9a6715',blue:'#1f5b8f',purple:'#7656a6',slate:'#5f6570'};
+const rows=[
+['Fernanda Mendes','04/mai','Adicionais Jejum/Transformação + dúvida de acesso','Cancelou Jejum programado, reembolsou Transformação e liberou DUO','Retida','Adicional resolvido'],
+['Lívia Isoldi','04/mai','Adicional não desejado','Cancelou Jejum e manteve plano principal','Retida','Adicional resolvido'],
+['Xiiiia Créditos','04/mai','Cobrança após cancelamento anterior','Transferiu para outro time','Encaminhada','Outro time interno'],
+['Hélen Cássia','04/mai','Jejum Diário não desejado','Estorno e cancelamento do adicional','Retida','Adicional resolvido'],
+['Karen','04/mai','Cancelamento pendente / 2ª parcela','Cancelou e enviou comprovante de estorno','Cancelada','Cancelamento efetivado'],
+['Lana Karla','04/mai','Não superou expectativas','Ofereceu reembolso parcial + Q Nutri; cliente recusou','Cancelada','Cancelamento efetivado'],
+['Kelly Joias','04/mai','Plano anual / bebê / academia','Explicou recorrência, ofereceu academia 90d; sem retorno','Pendente','Sem retorno'],
+['Anna Clara','04/mai','Falta de tempo','Ofereceu desconto; cliente recusou','Cancelada','Cancelamento efetivado'],
+['Ane Monteiro','04/mai','Não quer continuidade anual','Cancelou adicional, ofereceu desconto; cancelou tudo','Cancelada','Cancelamento efetivado'],
+['Monique Vieira','04/mai','Cobrança após cancelamento anterior','Orientou aguardar e-mail em 48h úteis','Encaminhada','Ticket / e-mail'],
+['Verônica Capela','04/mai','Jejum Diário não desejado','Cancelou adicional e manteve treinos','Retida','Adicional resolvido'],
+['Laysla Mesquita','04/mai','Vai usar DUO de amiga','Ofereceu DUO no acesso; cliente cancelou','Cancelada','Cancelamento efetivado'],
+['Neusa','04/mai','Compra duplicada','Cancelou duplicado e manteve 1 plano ativo','Retida','Correção financeira'],
+['Simone','04/mai','Demanda fora da alçada direta','Orientou abrir ticket Zendesk','Encaminhada','Ticket / e-mail'],
+['Tais Santos','04/mai','Jejum Diário cobrado junto','Cancelou adicional e manteve treinos','Retida','Adicional resolvido'],
+['mirrasaoluisma','04/mai','Cancelamento antes de débito','Orientou seguir por e-mail','Encaminhada','Ticket / e-mail'],
+['Raiane Costa','04/mai','Insatisfação com compra','Ofereceu +Q Nutri; cliente recusou','Cancelada','Cancelamento efetivado'],
+['Gabriela','04/mai','Compra pelo app cobrada à vista','Link parcelado + reembolso do plano atual','Retida','Conversão financeira'],
+['Brenda Silveira','05/mai','Precisa de outro time','Transferiu para equipe responsável','Encaminhada','Outro time interno'],
+['Ana Caroline','05/mai','Jejum Diário comprado por engano','Cancelou adicional, manteve plano de R$39/mês','Retida','Adicional resolvido'],
+['Sophia','05/mai','Apple / teste grátis / reembolso','Orientou suporte Apple e termos de uso','Encaminhada','Canal externo'],
+['Bruna Registre','05/mai','Plano já cancelado','Confirmou cancelamento e reembolso anterior','Resolvida','Pós-cancelamento'],
+['Elaine','05/mai','Sem motivo informado','Sem retorno após coleta de dados','Pendente','Sem retorno'],
+['Ederlandia','05/mai','Cancelar Transformação + ajuda de acesso','Reembolsou adicional e guiou login/TV','Retida','Adicional + suporte'],
+['Tati Marques','05/mai','Cobrança duplicada percebida','Identificou Jejum e cancelou adicional','Retida','Adicional resolvido'],
+['Doce Encanto','05/mai','Compra Apple / renovação externa','Orientou suporte Apple e termos de uso','Encaminhada','Canal externo'],
+['Tatiane','05/mai','Apple ainda ativa','Orientou que Apple processa cancelamento/reembolso','Encaminhada','Canal externo'],
+['Naty Fiais','05/mai','Limite do cartão / adicional','Cancelou adicional e manteve treinos por R$39,90','Retida','Adicional resolvido'],
+['Marina','05/mai','Não gostou dos treinos','Questionou objeção e seguiu cancelamento','Cancelada','Cancelamento efetivado'],
+['Monique Sarubbi','06/mai','Programa adicional cobrado','Orientou ticket/e-mail para reembolso do adicional','Encaminhada','Ticket / e-mail'],
+['Abssany','06/mai','Cancelamento dentro da garantia','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Yeda','06/mai','Arrependimento de compra','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Giseli','06/mai','Dúvida de comprovantes/e-mail','Enviou comprovantes e orientou','Resolvida','Suporte operacional'],
+['Francine Medeiros','06/mai','Duas parcelas / congelamento','Enviou comprovantes por e-mail','Resolvida','Suporte financeiro'],
+['Priscilla Rabelo','06/mai','Quer cancelar plano','Orientou abertura de ticket/e-mail','Encaminhada','Ticket / e-mail'],
+['Lidi Oliveira','06/mai','Falta de tempo','Ofereceu treinos curtos; cliente cancelou','Cancelada','Cancelamento efetivado'],
+['Lais Sismoto','06/mai','Garantia 3 dias / reembolso','Orientou tratativa de cancelamento/reembolso','Encaminhada','Ticket / e-mail'],
+['Rosilene Antunes','07/mai','Adicional comprado sem entender','Cancelou Jejum e manteve Queima ativa','Retida','Adicional resolvido'],
+['Samantha','07/mai','Compra integral / limite Nubank','Ofereceu opção mensal sem comprometer limite','Em tratativa','Conversão financeira'],
+['Thifany Oliveira','07/mai','Cancelamento parcial pendente','Acionou Jéssica/e-mail para retorno','Encaminhada','E-mail / outro atendente'],
+['Joyce Fortunato','08/mai','Atendimento operacional','Tratativa de suporte/cancelamento','Em tratativa','Suporte operacional'],
+['Leticia Lima','08/mai','App confuso / não gostou','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Nicolas','08/mai','Renovação automática e reembolso','Transferiu para outro time','Encaminhada','Outro time interno'],
+['Carolina Spier','08/mai','Suspender renovação anual automática','Tratativa de renovação','Encaminhada','Outro time interno'],
+['Sara Wendy','08/mai','Não recebeu acesso / erro de e-mail','Corrigiu login e senha; acesso resolvido','Resolvida','Suporte acesso'],
+['Ana Rodrigues','08/mai','Cobrança/renovação sem acesso','Transferiu para outro time','Encaminhada','Outro time interno'],
+['Nathalia Carvalho','08/mai','Dúvida sobre reembolso de plano cancelado','Explicou formas de estorno no cartão','Resolvida','Pós-cancelamento'],
+['Michelle','08/mai','Dúvida simples finalizada','Orientação encerrada','Resolvida','Suporte operacional'],
+['Damaris Scarleth','06/mai','Cobranças após cancelamento','Validou status e comprovantes','Resolvida','Suporte financeiro'],
+['Maria Julia','06/mai','Solicitação de cancelamento','Tratativa de cancelamento/reembolso','Em tratativa','Cancelamento em análise'],
+['Adriana','06/mai','Acesso / instalação / adicional','Orientou instalação e continuidade por contato','Resolvida','Suporte acesso'],
+['Stephany','06/mai','Compra sem querer / conta duplicada','Cancelou e reembolsou; esclareceu plano 12 meses','Cancelada','Cancelamento efetivado'],
+['Rosário','05/mai','Renovação automática após longo uso','Orientou abertura de ticket','Encaminhada','Ticket / e-mail'],
+['Bárbara','05/mai','Compra à vista / não quer recomprar','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Maria','05/mai','Não quer seguir no plano','Proposta de benefício/desconto','Em tratativa','Retenção tentativa'],
+['Ana Claudia','08/mai','Solicitação que exige e-mail','Orientou abrir ticket','Encaminhada','Ticket / e-mail'],
+['Juliana Alves','06/mai','Cancelamento já solicitado por e-mail','Orientou aguardar retorno','Encaminhada','Ticket / e-mail'],
+['Mari','06/mai','Duas cobranças / promessa de 30 dias','Ofereceu cancelar adicional; cliente cancelou tudo','Cancelada','Cancelamento efetivado'],
+['Fabi','06/mai','Cancelamento / reembolso','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Fernanda','06/mai','Paga e não usa','Tratativa de cancelamento','Cancelada','Cancelamento efetivado'],
+['Marina Gobbo','05/mai','Compra à vista consumiu limite','Ofereceu link recorrente; cliente seguiu cancelamento','Cancelada','Cancelamento financeiro'],
+['Rosario','05/mai','Renovação automática','Orientada a abrir ticket','Encaminhada','Ticket / e-mail'],
+['Bárbara Oliveira','05/mai','Compra à vista / limite','Cancelamento e reembolso','Cancelada','Cancelamento financeiro'],
+['Nicolas suporte','08/mai','Renovação automática / outro time','Transferência operacional','Encaminhada','Outro time interno'],
+['Leticia Lima suporte','08/mai','Não gostou do app','Cancelamento e reembolso','Cancelada','Cancelamento efetivado'],
+['Carolina Spier renovação','08/mai','Renovação anual automática','Encaminhamento para tratativa correta','Encaminhada','Outro time interno'],
+['Joyce Fortunato suporte','08/mai','Solicitação operacional','Orientação de suporte','Resolvida','Suporte operacional'],
+['Thifany Oliveira retorno','07/mai','Prazo de cancelamento/e-mail','Acionou retorno da responsável','Encaminhada','E-mail / outro atendente'],
+['Samantha conversão','07/mai','Valor integral no Nubank','Apresentou alternativa mensal','Em tratativa','Conversão financeira'],
+['Rosilene adicional','07/mai','Jejum/Mentalidade em forma','Cancelou adicional e manteve Queima','Retida','Adicional resolvido']
+];
+function count(fn){return rows.filter(fn).length}const total=rows.length,ret=count(r=>r[4]=='Retida'),res=count(r=>r[4]=='Resolvida'),can=count(r=>r[4]=='Cancelada'),pend=count(r=>r[4]=='Pendente'||r[4]=='Em tratativa'),enc=count(r=>r[4]=='Encaminhada'),add=count(r=>r[5].includes('Adicional')),ticket=count(r=>r[5].includes('Ticket')||r[5].includes('E-mail')),ext=count(r=>r[5].includes('Canal externo')||r[5].includes('Outro time')),sup=count(r=>r[5].includes('Suporte')||r[5].includes('Pós-cancelamento'));
+document.getElementById('kTotal').textContent=total;document.getElementById('kRetida').textContent=ret+res;document.getElementById('kCancelada').textContent=can;document.getElementById('kAdicional').textContent=add;document.getElementById('kTicket').textContent=ticket;document.getElementById('kExterno').textContent=ext;document.getElementById('mKeep').textContent=ret+res;document.getElementById('mLost').textContent=can;document.getElementById('mAdd').textContent=add;document.getElementById('mEsc').textContent=enc+pend;document.getElementById('headCount').textContent=`Validação: 72 recebidas · ${total} no dashboard`;
+function tag(r,t){if(r==='Retida')return '<span class="tag tg">Retida</span>';if(r==='Cancelada')return '<span class="tag tr">Cancelada</span>';if(r==='Resolvida')return '<span class="tag tg">Resolvida</span>';if(r==='Pendente'||r==='Em tratativa')return '<span class="tag ts">Pendente</span>';if(t.includes('Ticket')||t.includes('E-mail'))return '<span class="tag tp">Ticket/e-mail</span>';if(t.includes('Canal'))return '<span class="tag tb">Canal externo</span>';if(t.includes('Outro'))return '<span class="tag ta">Outro time</span>';return '<span class="tag ta">Encaminhada</span>'}
+function render(q=''){const body=document.querySelector('#table tbody');q=q.toLowerCase();body.innerHTML=rows.filter(r=>r.join(' ').toLowerCase().includes(q)).map((r,i)=>`<tr><td><b>${i+1}</b></td><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="muted">${r[2]}</td><td class="muted">${r[3]}</td><td>${tag(r[4],r[5])}</td><td class="muted">${r[5]}</td></tr>`).join('')}
+render();document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+function bars(id,data){const max=Math.max(...data.map(d=>d[1]));document.getElementById(id).innerHTML=data.map(([l,v,c])=>`<div class="bar-row"><div class="bar-label">${l}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%;background:${c}"></div></div><div class="bar-count">${v}</div></div>`).join('')}
+bars('motivos', [['Adicional não intencional',add,C.green],['Cancelamento total',can,C.red],['Ticket/e-mail',ticket,C.purple],['Outro time/canal externo',ext,C.blue],['Suporte/acesso/pós-cancelamento',sup,C.amber],['Sem retorno/em tratativa',pend,C.slate]]);
+bars('rotas', [['Ticket/e-mail 48h',ticket,C.purple],['Outro time interno',count(r=>r[5].includes('Outro')),C.amber],['Apple/Google/canal externo',count(r=>r[5].includes('Canal externo')),C.blue],['Suporte / acesso',sup,C.green],['Sem retorno / em tratativa',pend,C.slate]]);
+function legend(id,items){document.getElementById(id).innerHTML=items.map(i=>`<span><i class="dot" style="background:${i.c}"></i>${i.l}</span>`).join('')}
+new Chart(document.getElementById('chartOutcome'),{type:'doughnut',data:{labels:['Retidas','Resolvidas','Canceladas','Encaminhadas','Pendentes'],datasets:[{data:[ret,res,can,enc,pend],backgroundColor:[C.green,C.amber,C.red,C.purple,C.slate],borderColor:'#fffdf9',borderWidth:4,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} (${Math.round(c.raw/total*100)}%)`}}}}});legend('legendOutcome',[{l:`Retidas ${ret}`,c:C.green},{l:`Resolvidas ${res}`,c:C.amber},{l:`Canceladas ${can}`,c:C.red},{l:`Encaminhadas ${enc}`,c:C.purple},{l:`Pendentes ${pend}`,c:C.slate}]);
+const days=['04/mai','05/mai','06/mai','07/mai','08/mai'];function perDay(fn){return days.map(d=>rows.filter(r=>r[1]==d&&fn(r)).length)}new Chart(document.getElementById('chartDays'),{type:'bar',data:{labels:days,datasets:[{label:'Retidas/resolvidas',data:perDay(r=>r[4]=='Retida'||r[4]=='Resolvida'),backgroundColor:C.green},{label:'Canceladas',data:perDay(r=>r[4]=='Cancelada'),backgroundColor:C.red},{label:'Encaminhadas/pendentes',data:perDay(r=>r[4]=='Encaminhada'||r[4]=='Pendente'||r[4]=='Em tratativa'),backgroundColor:C.purple}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#a79d94'}},y:{stacked:true,grid:{color:'rgba(23,19,16,.07)'},ticks:{color:'#a79d94',stepSize:2}}},plugins:{legend:{display:false}}}});legend('legendDays',[{l:'Retidas/resolvidas',c:C.green},{l:'Canceladas',c:C.red},{l:'Encaminhadas/pendentes',c:C.purple}]);
 </script>
 </body>
 </html>
